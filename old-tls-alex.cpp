@@ -40,18 +40,6 @@ void handleError(const char *buffer)
 	}
 }
 
-// colour (for case insensitive search)
-void handleColour(const char *buffer){
-	int32_t data[16];
-	memcpy(data, &buffer[1], sizeof(data));
-
-	printf("\n ------- ALEX COLOUR  REPORT ------- \n\n");
-	printf("Colour:%c\n", data[0]);
-	printf("Ultrasonic Distance:%d\n", data[1]);
-	printf("\n---------------------------------------\n\n");
-}
-	
-
 void handleStatus(const char *buffer)
 {
 	int32_t data[16];
@@ -105,10 +93,6 @@ void handleNetwork(const char *buffer, int len)
 		case NET_COMMAND_PACKET:
 		handleCommand(buffer);
 		break;
-
-		case NET_COLOUR_PACKET:
-		handleColour(buffer);
-		break;
 	}
 }
 
@@ -118,8 +102,12 @@ void sendData(void *conn, const char *buffer, int len)
 	printf("\nSENDING %d BYTES DATA\n\n", len);
 	if(networkActive)
 	{
+
 		/* TODO: Insert SSL write here to write buffer to network */
-		c = sslWrite(conn,buffer,len);
+                
+	//	int sslWrite(void *conn, const char *buffer, int len);         
+	//
+		c = sslWrite(conn, buffer, len);
 
 		/* END TODO */	
 		networkActive = (c > 0);
@@ -134,9 +122,11 @@ void *readerThread(void *conn)
 	while(networkActive)
 	{
 		/* TODO: Insert SSL read here into buffer */
+		//int sslRead(void *conn, char *buffer, int len);
 
 		len = sslRead(conn, buffer, 128);
-		printf("read %d bytes from server.\n", len);
+
+        printf("read %d bytes from server.\n", len);
 		
 		/* END TODO */
 
@@ -177,7 +167,7 @@ void *writerThread(void *conn)
 	while(!quit)
 	{
 		char ch;
-		printf("Command (f=forward, b=reverse, l=turn left, r=turn right, s=stop, c=clear stats, g=get stats q=exit (beta) z=colour sensor + ultrasonic reading)\n");
+		printf("Command (f=forward, b=reverse, l=turn left, r=turn right, s=stop, c=clear stats, g=get stats q=exit)\n");
 		scanf("%c", &ch);
 
 		// Purge extraneous characters from input stream
@@ -208,8 +198,6 @@ void *writerThread(void *conn)
 			case 'C':
 			case 'g':
 			case 'G':
-			case 'z':
-			case 'Z':
 					params[0]=0;
 					params[1]=0;
 					memcpy(&buffer[2], params, sizeof(params));
@@ -239,7 +227,7 @@ void *writerThread(void *conn)
 #define CLIENT_KEY_FNAME "laptop.key"
 #define CLIENT_CERT_FNAME "laptop.crt"
 #define CA_CERT_FNAME "signing.pem"
-#define SERVER_NAME "pi.local"
+#define SERVER_NAME "192.168.43.118"
 #define PORT_NUM 5000
 #define SERVER_NAME_ON_CERT "pi.3b"
 
@@ -248,9 +236,9 @@ void *writerThread(void *conn)
 void connectToServer(const char *serverName, int portNum)
 {
     /* TODO: Create a new client */
-	createClient(SERVER_NAME, PORT_NUM, 1, CA_CERT_FNAME,
-	SERVER_NAME_ON_CERT, 1, CLIENT_CERT_FNAME, 
-	CLIENT_KEY_FNAME, readerThread, writerThread);
+	createClient(SERVER_NAME, PORT_NUM, 1, CA_CERT_FNAME, SERVER_NAME_ON_CERT, 1, CLIENT_CERT_FNAME, CLIENT_KEY_FNAME, readerThread, writerThread);
+	while (client_is_running());
+
     /* END TODO */
 }
 
@@ -268,7 +256,6 @@ int main(int ac, char **av)
     /* TODO: Add in while loop to prevent main from exiting while the
     client loop is running */
 
-	while(client_is_running());
 
 
     /* END TODO */

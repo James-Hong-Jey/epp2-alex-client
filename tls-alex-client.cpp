@@ -46,8 +46,11 @@ void handleColour(const char *buffer){
 	memcpy(data, &buffer[1], sizeof(data));
 
 	printf("\n ------- ALEX COLOUR  REPORT ------- \n\n");
-	printf("Colour:%c\n", data[0]);
-	printf("Ultrasonic Distance:%d\n", data[1]);
+	printf("Red:%d\n", data[0]);
+	printf("Green:%d\n", data[1]);
+	printf("Blue:%d\n", data[2]);
+  printf("My best guess:%c\n", data[3]);
+	printf("Ultrasonic Distance:%d\n", data[4]);
 	printf("\n---------------------------------------\n\n");
 }
 	
@@ -220,6 +223,41 @@ void *writerThread(void *conn)
 			case 'Q':
 				quit=1;
 				break;
+
+      // EZ controls - wasd (without s), shift W (or x) for reverse
+      case 'w':
+        params[0]=10;
+        params[1]=85;
+        buffer[1] = 'f';
+        memcpy(&buffer[2], params, sizeof(params));
+        sendData(conn, buffer, sizeof(buffer));
+        break;
+      case 'W':
+      case 'x':
+      case 'X':
+        params[0]=10;
+        params[1]=85;
+        buffer[1] = 'b';
+        memcpy(&buffer[2], params, sizeof(params));
+        sendData(conn, buffer, sizeof(buffer));
+        break;
+      case 'a':
+      case 'A':
+        params[0]=10;
+        params[1]=85;
+        buffer[1] = 'l';
+        memcpy(&buffer[2], params, sizeof(params));
+        sendData(conn, buffer, sizeof(buffer));
+        break;
+      case 'd':
+      case 'D':
+        params[0]=10;
+        params[1]=85;
+        buffer[1] = 'r';
+        memcpy(&buffer[2], params, sizeof(params));
+        sendData(conn, buffer, sizeof(buffer));
+        break;
+
 			default:
 				printf("BAD COMMAND\n");
 		}
